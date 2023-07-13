@@ -51,5 +51,21 @@ Mat detectDishEdge(cv::Mat image)
         }
     }*/
 
+
     return ImageCircles;
+}
+
+
+vector<Mat> createVecImgFromSource(string path)
+{
+    vector<Mat> images;
+    vector<string> fileNames;
+    glob(path, fileNames);
+    for (const auto& filename : fileNames)
+    {
+        Mat image = imread(filename);
+        images.push_back(image);
+    }
+    return images;
+
 }

@@ -15,5 +15,9 @@
 cv::Mat detectDishEdge(cv::Mat image);
 cv::Mat testolo(cv::Mat image);
 
+std::vector<cv::Mat> createVecImgFromSource(std::string path);
+
+
+
 
 #endif //FOOD_RECOGNITION_AND_LEFTOVER_ESTIMATION_DETECTFOOD_H
