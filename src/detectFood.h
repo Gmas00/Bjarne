@@ -13,10 +13,13 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 cv::Mat detectDishEdge(cv::Mat image);
-cv::Mat testolo(cv::Mat image);
+cv::Mat watershedByOpencCV(cv::Mat src);
 
 std::vector<cv::Mat> createVecImgFromSource(std::string path);
 
+cv::Mat augmentation( cv::Mat image, float factor);
+
+cv::Mat segmentationHope(cv::Mat dishes0);
 
 
 
