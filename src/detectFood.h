@@ -21,6 +21,8 @@ cv::Mat augmentation( cv::Mat image, float factor);
 
 cv::Mat segmentationHope(cv::Mat dishes0);
 
+cv::Mat detectSalad(cv::Mat image);
+
 
 
 #endif //FOOD_RECOGNITION_AND_LEFTOVER_ESTIMATION_DETECTFOOD_H

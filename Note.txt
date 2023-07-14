@@ -1,0 +1,11 @@
+Elenco per capire in quali tray ho problemi nell'isolare il piatto
+In alucni però la linea nera è in mezzo alle scatole, bisogna capire come toglierla
+
+tray1 ok
+tray2 ok
+tray3 ok tranne la prima
+tray4 ok tranne prime due
+tray5 ok
+tray6 ok
+tray7 ok
+tray8 ok

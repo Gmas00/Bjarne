@@ -27,29 +27,32 @@ int main() {
     tray8 = createVecImgFromSource("../src/resource/Food_leftover_dataset/tray8/");
 
 
-    /*for(int i = 0;i<4;i++)
+    for(int i = 0;i<4;i++)
     {
-        Mat image = tray5[i];
-        Mat imageCircles = detectDishEdge(image);
+        Mat image = tray8[i];
+        Mat imageCircles = /*detectSalad(image);*/detectDishEdge(image);
+
         imshow("Dish",imageCircles);
         waitKey(0);
-    }*/
+    }
 
-    Mat image1 = tray1[0];
-    Mat dishes = detectDishEdge(image1);
-
-
-    //float factor = 0.5;
-    //Mat augmented_image = augmentation(dishes, factor);
+    Mat image1 = tray2[0];
+    //Mat dishes = detectDishEdge(image1);
 
 
+//    float factor = 0.5;
+//    Mat augmented_image = augmentation(image1, factor);
+//    imshow("a",augmented_image);
+//    waitKey(0);
 
-    Mat seg = segmentationHope(dishes);
 
 
-    imshow("seg", seg);
-    imshow("dish",dishes);
-    waitKey(0);
+   // Mat seg = segmentationHope(dishes);
+
+
+    //imshow("seg", seg);
+    //imshow("dish",dishes);
+    //waitKey(0);
 
 
 
