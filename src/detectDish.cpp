@@ -3,66 +3,45 @@
 //
 
 
-#include "detectFood.h"
+#include "detectDish.h"
 using namespace std;
 using namespace cv;
 
 
-Mat detectDishEdge(cv::Mat image)
+
+Mat detectDishesEdge(Mat image)
 {
-    Mat ImageCircles;
-    image.copyTo(ImageCircles);
+    Mat imageCircles;
+    image.copyTo(imageCircles);
     Mat gray;
     cvtColor(image,gray,COLOR_RGB2GRAY);
 
-    medianBlur(gray,gray,5);
+    medianBlur(gray,gray,7);
 
-    //get the circle edges
+    Mat mask(imageCircles.size(), CV_8UC1, Scalar(0));
     vector<Vec3f>circles;
-    HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/16,100,30,270,292);
+    //HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/16,100,30,268,292);
+    HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 260, 280);
     for (int i =0; i<circles.size();i++)
     {
         Vec3i c = circles[i];
         Point center = Point(c[0],c[1]);
-        circle(ImageCircles, center, 1,Scalar(0,100,100),3,LINE_AA);
+       // circle(ImageCircles, center, 1,Scalar(0,100,100),3,LINE_AA);
         int radius = c[2];
-        circle(ImageCircles,center,radius,Scalar(0,0,0),3,LINE_AA);
-    }
-
-    //mask to isolate only the dish
-    Mat mask(ImageCircles.size(), CV_8UC1, Scalar(0));
-    for (int i = 0; i < circles.size(); i++)
-    {
-        Vec3i c = circles[i];
-        Point center = Point(c[0], c[1]);
-        int radius = c[2];
+        //circle(ImageCircles,center,radius,Scalar(0,0,0),3,LINE_AA);
         circle(mask, center, radius, Scalar(255), -1);
     }
-    for(int i=0;i<ImageCircles.rows;i++)
+    for(int i=0;i<imageCircles.rows;i++)
     {
-        for(int j=0;j<ImageCircles.cols;j++)
+        for(int j=0;j<imageCircles.cols;j++)
         {
             if(mask.at<unsigned char>(i,j)==0)
             {
-                ImageCircles.at<Vec3b>(i,j) = 0;
+                imageCircles.at<Vec3b>(i,j) = 0;
             }
         }
     }
-    return ImageCircles;
-}
-
-vector<Mat> createVecImgFromSource(string path)
-{
-    vector<Mat> images;
-    vector<string> fileNames;
-    glob(path, fileNames);
-    for (const auto& filename : fileNames)
-    {
-        Mat image = imread(filename);
-        images.push_back(image);
-    }
-    return images;
-
+    return imageCircles;
 }
 
 Mat watershedByOpencCV(Mat src)
@@ -198,9 +177,18 @@ Mat augmentation(Mat image0, float factor)
     Mat mask;
     threshold(gray, mask, 1, 255, THRESH_BINARY);
 
+
+    // Apply morphological operations to improve the mask
+    Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5));
+    morphologyEx(mask, mask, MORPH_CLOSE, kernel);
+
+
+
     // Set non-colored areas to black
     Mat result = augmented_rgb.clone();
     result.setTo(Scalar(0, 0, 0), ~mask);
+
+
 
     return result;
 }
@@ -215,11 +203,11 @@ Mat segmentationHope(Mat dishes0)
     Mat hsvImage;
     cvtColor(blurredImage, hsvImage, COLOR_BGR2HSV);
 
-    Scalar lowerThreshold = Scalar(0, 30, 60);
-    Scalar upperThreshold = Scalar(30, 255, 255);
+    Scalar lower = Scalar(0, 30, 60);
+    Scalar upper = Scalar(30, 255, 255);
 
     Mat mask;
-    inRange(hsvImage, lowerThreshold, upperThreshold, mask);
+    inRange(hsvImage, lower, upper, mask);
 
     Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5));
     morphologyEx(mask, mask, MORPH_OPEN, kernel);
@@ -268,7 +256,7 @@ Mat detectSalad(cv::Mat image)
 
     //get the circle edges
     vector<Vec3f>circles;
-    HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/16,100,30,180,200);
+    HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/8,100,30,179,191);
     for (int i =0; i<circles.size();i++)
     {
         Vec3i c = circles[i];
@@ -279,7 +267,7 @@ Mat detectSalad(cv::Mat image)
     }
 
     //mask to isolate only the dish
-    Mat mask(ImageCircles.size(), CV_8UC1, Scalar(0));
+    /*Mat mask(ImageCircles.size(), CV_8UC1, Scalar(0));
     for (int i = 0; i < circles.size(); i++)
     {
         Vec3i c = circles[i];
@@ -296,6 +284,28 @@ Mat detectSalad(cv::Mat image)
                 ImageCircles.at<Vec3b>(i,j) = 0;
             }
         }
-    }
+    }*/
+
     return ImageCircles;
+}
+
+Mat removeDishes(Mat image, int delta)
+{
+    Mat img;
+    image.copyTo(img);
+    for(int i=0; i<img.rows; i++)
+    {
+        for(int j=0; j<img.cols; j++)
+        {
+            Vec3b pix = img.at<Vec3b>(i,j);
+            int avg = (int)(pix[0] + pix[1] + pix[2])/3;
+            if(pix[0]-avg < delta && pix[1]-avg < delta && pix[2]-avg < delta)
+            {
+                img.at<Vec3b>(i,j) [0]= 0;
+                img.at<Vec3b>(i,j) [1]= 0;
+                img.at<Vec3b>(i,j) [2] = 0;
+            }
+        }
+    }
+    return img;
 }
