@@ -3,14 +3,16 @@
 //
 
 
-#include "detectDish.h"
+#include "detectDishes.h"
 using namespace std;
 using namespace cv;
 
 
 
-Mat detectDishesEdge(Mat image)
+Mat detectDishesEdge(const Mat& image)
 {
+    int min = 260;
+    int max = 280;
     Mat imageCircles;
     image.copyTo(imageCircles);
     Mat gray;
@@ -21,7 +23,7 @@ Mat detectDishesEdge(Mat image)
     Mat mask(imageCircles.size(), CV_8UC1, Scalar(0));
     vector<Vec3f>circles;
     //HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/16,100,30,268,292);
-    HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 260, 280);
+    HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, min, max);
 
     for (int i =0; i<circles.size();i++)
     {
@@ -45,6 +47,30 @@ Mat detectDishesEdge(Mat image)
     return imageCircles;
 }
 
+Mat detectSalad(const Mat& image)
+{
+    int hCanny = 100;
+    int hCircle = 50;
+    int max = 210;
+    int min = 175;
+    Mat salad;
+    Mat gray;
+    vector<Vec3f> bowl;
+    image.copyTo(salad);
+
+    cvtColor(image,gray,COLOR_RGB2GRAY);
+
+    HoughCircles(gray, bowl, HOUGH_GRADIENT, 1, gray.rows / 16, hCanny, hCircle, min, max);
+    for (int i = 0; i < bowl.size(); i++)
+        circle(salad, Point(bowl[i][0], bowl[i][1]), bowl[i][2], cv::Scalar(0, 0, 255), 3);
+    return salad;
+
+}
+
+
+
+
+//tentativo ma bocciato
 Mat watershedByOpencCV(Mat src)
 {
     Mat mask;
@@ -137,8 +163,6 @@ Mat watershedByOpencCV(Mat src)
 
     return dst;
 }
-
-//tentativo ma bocciato
 Mat augmentation(Mat image0, float factor)
 {
     Mat image;
@@ -193,7 +217,6 @@ Mat augmentation(Mat image0, float factor)
 
     return result;
 }
-
 Mat segmentationHope(Mat dishes0)
 {
     Mat dishes;
@@ -246,56 +269,8 @@ Mat segmentationHope(Mat dishes0)
     return  dishes;
 }
 
-Mat detectSalad(Mat image)
-{
 
-
-    const unsigned int HOUGH_CANNY_THRESHOLD = 100;
-    const unsigned int HOUGH_CIRCLE_ROUNDNESS = 50;
-
-    const unsigned int BOWLS_HOUGH_MAX_RADIUS = 210;
-
-
-
-    Mat ImageCircles;
-    image.copyTo(ImageCircles);
-    Mat gray;
-    cvtColor(image,gray,COLOR_RGB2GRAY);
-
-    medianBlur(gray,gray,5);
-    Mat mask(ImageCircles.size(), CV_8UC1, Scalar(0));
-    //get the circle edges
-    vector<Vec3f>circles;
-    //HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/8,100,30,179,191);
-    //HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 175, 210);
-
-    HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, gray.rows / 16, HOUGH_CANNY_THRESHOLD, HOUGH_CIRCLE_ROUNDNESS, BOWLS_HOUGH_MIN_RADIUS, BOWLS_HOUGH_MAX_RADIUS);
-
-    for (int i =0; i<circles.size();i++)
-    {
-        Vec3i c = circles[i];
-        Point center = Point(c[0],c[1]);
-        circle(ImageCircles, center, 1,Scalar(0,100,100),3,LINE_AA);
-        int radius = c[2];
-       // circle(ImageCircles,center,radius,Scalar(0,0,0),3,LINE_AA);
-        circle(mask, center, radius, Scalar(255), -1);
-    }
-
-
-    for(int i=0;i<ImageCircles.rows;i++)
-    {
-        for(int j=0;j<ImageCircles.cols;j++)
-        {
-            if(mask.at<unsigned char>(i,j)==0)
-            {
-                ImageCircles.at<Vec3b>(i,j) = 0;
-            }
-        }
-    }
-
-    return ImageCircles;
-}
-
+//ste
 Mat removeDishes(Mat image, int delta)
 {
     Mat img;
@@ -316,3 +291,7 @@ Mat removeDishes(Mat image, int delta)
     }
     return img;
 }
+
+
+
+
