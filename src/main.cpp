@@ -9,19 +9,13 @@
 #include <opencv2/imgproc.hpp>
 #include "detectDishes.h"
 #include "utils.h"
-#include "Mask.h"
 
 using namespace cv;
 using namespace std;
 
-
-
-
-
-
 int main()
 {
-    const vector<string> labels ={
+    const vector<string> labels = {
             "Background",
             "pasta with pesto",
             "pasta with tomato sauce",
@@ -49,22 +43,26 @@ int main()
     tray7 = createVecImgFromSource("../src/resource/Food_leftover_dataset/tray7/");
     tray8 = createVecImgFromSource("../src/resource/Food_leftover_dataset/tray8/");
 
-for(int i=0;i<4;i++)
-{
-    break;
-    Mat image, output;
-    image = tray8[i];
-    output = detectFoods(image);
-    imshow("food", output);
-    waitKey(0);
-}
+    for(int i=0;i<4;i++)
+    {
+        break;
+        Mat image, output;
+        image = tray8[i];
+        output = detectFoods(image);
+        imshow("food", output);
+        waitKey(0);
+    }
 
     Mat temp2;
     Mat img = tray1[0];
     Mat external, temp;
     temp = detectFoods(img);
     external = img - temp;
-    imshow("ex",external);
+    //imshow("ex",external);
+    //waitKey(0);
+
+    Mat bread = detectBread(img);
+    imshow("bread", bread);
     waitKey(0);
 
     
