@@ -18,6 +18,10 @@ cv::Mat detectSalad(const cv::Mat& image);
 
 cv::Mat detectDishesEdge(const cv::Mat& image);
 
+cv::Mat detectFoods(const cv::Mat& image);
+
+
+//tentativi
 cv::Mat watershedByOpencCV(cv::Mat src);
 
 cv::Mat augmentation( cv::Mat image, float factor);
@@ -26,7 +30,7 @@ cv::Mat segmentationHope(cv::Mat dishes0);
 
 cv::Mat segmentImage(const cv::Mat& inputImage, int k);
 
-//
+//ste
 cv::Mat removeDishes(cv::Mat image, int delta);
 
 

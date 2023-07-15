@@ -17,7 +17,7 @@ using namespace std;
 
 int main()
 {
-    const vector<string> labels = {
+    const vector<string> labels ={
             "Background",
             "pasta with pesto",
             "pasta with tomato sauce",
@@ -45,19 +45,14 @@ int main()
     tray7 = createVecImgFromSource("../src/resource/Food_leftover_dataset/tray7/");
     tray8 = createVecImgFromSource("../src/resource/Food_leftover_dataset/tray8/");
 
-
-    for(int i=0;i<4;i++)
-    {
-        Mat salad = detectSalad((tray4[i]));
-        //Mat img = detectDishesEdge(tray2[i]);
-        int delta = 20;
-
-        //Mat salad = detectSalad(tray3[i]);
-        //Mat temp = watershedByOpencCV(removeDishes(img, delta));
-        //imshow("temp", img);
-        imshow("salad",salad);
-        waitKey(0);
-    }
+for(int i=0;i<4;i++)
+{
+    Mat image, output;
+    image = tray8[i];
+    output = detectFoods(image);
+    imshow("food", output);
+    waitKey(0);
+}
 
 
     //Mask mas(tray2[0]);

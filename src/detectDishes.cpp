@@ -9,8 +9,17 @@ using namespace cv;
 
 
 
-Mat detectDishesEdge(Mat image)
+Mat detectDishesEdge(const Mat& image)
 {
+
+    int max= 350;
+    int min = 250;
+    int hCanny = 100;
+    int hCircle = 50;
+
+
+
+
     Mat imageCircles;
     image.copyTo(imageCircles);
     Mat gray;
@@ -21,8 +30,8 @@ Mat detectDishesEdge(Mat image)
     Mat mask(imageCircles.size(), CV_8UC1, Scalar(0));
     vector<Vec3f>circles;
     //HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/16,100,30,268,292);
-    HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 260, 280);
-
+   // HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 260, 280);
+    HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, gray.rows / 16, hCanny, hCircle, min+10, max+10);
     for (int i =0; i<circles.size();i++)
     {
         Vec3i c = circles[i];
@@ -44,6 +53,7 @@ Mat detectDishesEdge(Mat image)
     }
     return imageCircles;
 }
+
 Mat detectSalad(const Mat& image)
 {
     int hCanny = 100;
@@ -59,10 +69,52 @@ Mat detectSalad(const Mat& image)
 
     HoughCircles(gray, bowl, HOUGH_GRADIENT, 1, gray.rows / 16, hCanny, hCircle, min, max);
     for (int i = 0; i < bowl.size(); i++)
-        circle(salad, Point(bowl[i][0], bowl[i][1]), bowl[i][2], cv::Scalar(0, 0, 255), 3);
+        circle(salad, Point(bowl[i][0], bowl[i][1]), bowl[i][2], cv::Scalar(0, 0, 0), 2);
+
+    Mat mask(image.size(), CV_8UC1,Scalar(0));
+    for (int i =0; i<bowl.size();i++)
+    {
+        Vec3i c = bowl[i];
+        Point center = Point(c[0],c[1]);
+        // circle(ImageCircles, center, 1,Scalar(0,100,100),3,LINE_AA);
+        int radius = c[2];
+        //circle(ImageCircles,center,radius,Scalar(0,0,0),3,LINE_AA);
+        circle(mask, center, radius, Scalar(255), -1);
+    }
+
+    for(int i=0;i<salad.rows;i++)
+    {
+        for(int j=0;j<salad.cols;j++)
+        {
+            if(mask.at<unsigned char>(i,j)==0)
+            {
+                salad.at<Vec3b>(i,j) = 0;
+            }
+        }
+    }
     return salad;
 
 }
+
+Mat detectFoods(const Mat& image)
+{
+    vector<Mat>images;
+    Mat temp1, temp2;
+    //image.copyTo(temp1);
+    //image.copyTo(temp2);
+
+    temp1 = detectDishesEdge(image);
+    temp2 = detectSalad(image);
+    Mat all = temp1 + temp2;
+    return all;
+}
+
+
+
+
+
+
+
 
 
 //tentativo ma bocciato
@@ -263,7 +315,6 @@ Mat watershedByOpencCV(Mat src)
 
     return dst;
 }
-
 
 //ste
 Mat removeDishes(Mat image, int delta)
