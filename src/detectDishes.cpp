@@ -3,7 +3,7 @@
 //
 
 
-#include "detectDish.h"
+#include "detectDishes.h"
 using namespace std;
 using namespace cv;
 
@@ -44,7 +44,163 @@ Mat detectDishesEdge(Mat image)
     }
     return imageCircles;
 }
+Mat detectSalad(Mat image)
+{
 
+
+    const unsigned int HOUGH_CANNY_THRESHOLD = 100;
+    const unsigned int HOUGH_CIRCLE_ROUNDNESS = 50;
+
+    const unsigned int BOWLS_HOUGH_MAX_RADIUS = 210;
+
+
+
+    Mat ImageCircles;
+    image.copyTo(ImageCircles);
+    Mat gray;
+    cvtColor(image,gray,COLOR_RGB2GRAY);
+
+    medianBlur(gray,gray,5);
+    Mat mask(ImageCircles.size(), CV_8UC1, Scalar(0));
+    //get the circle edges
+    vector<Vec3f>circles;
+    //HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/8,100,30,179,191);
+    //HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 175, 210);
+
+    HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, gray.rows / 16, HOUGH_CANNY_THRESHOLD, HOUGH_CIRCLE_ROUNDNESS, BOWLS_HOUGH_MIN_RADIUS, BOWLS_HOUGH_MAX_RADIUS);
+
+    for (int i =0; i<circles.size();i++)
+    {
+        Vec3i c = circles[i];
+        Point center = Point(c[0],c[1]);
+        circle(ImageCircles, center, 1,Scalar(0,100,100),3,LINE_AA);
+        int radius = c[2];
+        // circle(ImageCircles,center,radius,Scalar(0,0,0),3,LINE_AA);
+        circle(mask, center, radius, Scalar(255), -1);
+    }
+
+
+    for(int i=0;i<ImageCircles.rows;i++)
+    {
+        for(int j=0;j<ImageCircles.cols;j++)
+        {
+            if(mask.at<unsigned char>(i,j)==0)
+            {
+                ImageCircles.at<Vec3b>(i,j) = 0;
+            }
+        }
+    }
+
+    return ImageCircles;
+}
+
+
+//tentativo ma bocciato
+Mat augmentation(Mat image0, float factor)
+{
+    Mat image;
+    image0.copyTo(image);
+    Mat hsv_image;
+    cvtColor(image, hsv_image, COLOR_RGB2HSV);
+
+    vector<Mat> channels;
+    split(hsv_image, channels);
+
+    Mat h = channels[0];
+    Mat s = channels[1];
+    Mat v = channels[2];
+
+    // Fact * channel
+    h = h * factor;
+    s = s * factor;
+    v = v * factor;
+
+    // Clamp values to [0, 255]
+    threshold(h, h, 255, 255, THRESH_TRUNC);
+    threshold(s, s, 255, 255, THRESH_TRUNC);
+    threshold(v, v, 255, 255, THRESH_TRUNC);
+
+    // Merge channels
+    Mat augmented_hsv;
+    merge(channels, augmented_hsv);
+
+    Mat augmented_rgb;
+    cvtColor(augmented_hsv, augmented_rgb, COLOR_HSV2RGB);
+
+    // Convert to grayscale
+    Mat gray;
+    cvtColor(augmented_rgb, gray, COLOR_RGB2GRAY);
+
+    // Apply threshold to isolate colored areas
+    Mat mask;
+    threshold(gray, mask, 1, 255, THRESH_BINARY);
+
+
+    // Apply morphological operations to improve the mask
+    Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5));
+    morphologyEx(mask, mask, MORPH_CLOSE, kernel);
+
+
+
+    // Set non-colored areas to black
+    Mat result = augmented_rgb.clone();
+    result.setTo(Scalar(0, 0, 0), ~mask);
+
+
+
+    return result;
+}
+Mat segmentationHope(Mat dishes0)
+{
+    Mat dishes;
+    dishes0.copyTo(dishes);
+    Mat blurredImage;
+    GaussianBlur(dishes, blurredImage, Size(5,5), 0);
+
+    Mat hsvImage;
+    cvtColor(blurredImage, hsvImage, COLOR_BGR2HSV);
+
+    Scalar lower = Scalar(0, 30, 60);
+    Scalar upper = Scalar(30, 255, 255);
+
+    Mat mask;
+    inRange(hsvImage, lower, upper, mask);
+
+    Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5));
+    morphologyEx(mask, mask, MORPH_OPEN, kernel);
+    morphologyEx(mask, mask, MORPH_CLOSE, kernel);
+
+    vector<vector<Point>> contours;
+    findContours(mask, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+    Mat contourImage = Mat::zeros(dishes.size(), CV_8UC3);
+    for (int i = 0; i < contours.size(); i++)
+    {
+        double area = contourArea(contours[i]);
+        if (area > 2000)
+        {
+            drawContours(contourImage, contours, static_cast<int>(i), Scalar(255, 255, 255), FILLED);
+        }
+    }
+
+    cvtColor(contourImage,contourImage,COLOR_HSV2BGR);
+    cvtColor(contourImage,contourImage,COLOR_BGRA2GRAY);
+
+    for(int i=0;i<dishes.rows;i++)
+    {
+        for(int j=0;j<dishes.cols;j++)
+        {
+            if(contourImage.at<unsigned char>(i,j)==0)
+            {
+                dishes.at<Vec3b>(i,j)[0]=0;
+                dishes.at<Vec3b>(i,j)[1]=0;
+                dishes.at<Vec3b>(i,j)[2]=0;
+            }
+        }
+    }
+
+    return  dishes;
+}
 Mat watershedByOpencCV(Mat src)
 {
     Mat mask;
@@ -138,164 +294,8 @@ Mat watershedByOpencCV(Mat src)
     return dst;
 }
 
-//tentativo ma bocciato
-Mat augmentation(Mat image0, float factor)
-{
-    Mat image;
-    image0.copyTo(image);
-    Mat hsv_image;
-    cvtColor(image, hsv_image, COLOR_RGB2HSV);
 
-    vector<Mat> channels;
-    split(hsv_image, channels);
-
-    Mat h = channels[0];
-    Mat s = channels[1];
-    Mat v = channels[2];
-
-    // Fact * channel
-    h = h * factor;
-    s = s * factor;
-    v = v * factor;
-
-    // Clamp values to [0, 255]
-    threshold(h, h, 255, 255, THRESH_TRUNC);
-    threshold(s, s, 255, 255, THRESH_TRUNC);
-    threshold(v, v, 255, 255, THRESH_TRUNC);
-
-    // Merge channels
-    Mat augmented_hsv;
-    merge(channels, augmented_hsv);
-
-    Mat augmented_rgb;
-    cvtColor(augmented_hsv, augmented_rgb, COLOR_HSV2RGB);
-
-    // Convert to grayscale
-    Mat gray;
-    cvtColor(augmented_rgb, gray, COLOR_RGB2GRAY);
-
-    // Apply threshold to isolate colored areas
-    Mat mask;
-    threshold(gray, mask, 1, 255, THRESH_BINARY);
-
-
-    // Apply morphological operations to improve the mask
-    Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5));
-    morphologyEx(mask, mask, MORPH_CLOSE, kernel);
-
-
-
-    // Set non-colored areas to black
-    Mat result = augmented_rgb.clone();
-    result.setTo(Scalar(0, 0, 0), ~mask);
-
-
-
-    return result;
-}
-
-Mat segmentationHope(Mat dishes0)
-{
-    Mat dishes;
-    dishes0.copyTo(dishes);
-    Mat blurredImage;
-    GaussianBlur(dishes, blurredImage, Size(5,5), 0);
-
-    Mat hsvImage;
-    cvtColor(blurredImage, hsvImage, COLOR_BGR2HSV);
-
-    Scalar lower = Scalar(0, 30, 60);
-    Scalar upper = Scalar(30, 255, 255);
-
-    Mat mask;
-    inRange(hsvImage, lower, upper, mask);
-
-    Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5));
-    morphologyEx(mask, mask, MORPH_OPEN, kernel);
-    morphologyEx(mask, mask, MORPH_CLOSE, kernel);
-
-    vector<vector<Point>> contours;
-    findContours(mask, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-
-    Mat contourImage = Mat::zeros(dishes.size(), CV_8UC3);
-    for (int i = 0; i < contours.size(); i++)
-    {
-        double area = contourArea(contours[i]);
-        if (area > 2000)
-        {
-            drawContours(contourImage, contours, static_cast<int>(i), Scalar(255, 255, 255), FILLED);
-        }
-    }
-
-    cvtColor(contourImage,contourImage,COLOR_HSV2BGR);
-    cvtColor(contourImage,contourImage,COLOR_BGRA2GRAY);
-
-    for(int i=0;i<dishes.rows;i++)
-    {
-        for(int j=0;j<dishes.cols;j++)
-        {
-            if(contourImage.at<unsigned char>(i,j)==0)
-            {
-                dishes.at<Vec3b>(i,j)[0]=0;
-                dishes.at<Vec3b>(i,j)[1]=0;
-                dishes.at<Vec3b>(i,j)[2]=0;
-            }
-        }
-    }
-
-    return  dishes;
-}
-
-Mat detectSalad(Mat image)
-{
-
-
-    const unsigned int HOUGH_CANNY_THRESHOLD = 100;
-    const unsigned int HOUGH_CIRCLE_ROUNDNESS = 50;
-
-    const unsigned int BOWLS_HOUGH_MAX_RADIUS = 210;
-
-
-
-    Mat ImageCircles;
-    image.copyTo(ImageCircles);
-    Mat gray;
-    cvtColor(image,gray,COLOR_RGB2GRAY);
-
-    medianBlur(gray,gray,5);
-    Mat mask(ImageCircles.size(), CV_8UC1, Scalar(0));
-    //get the circle edges
-    vector<Vec3f>circles;
-    //HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/8,100,30,179,191);
-    //HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 175, 210);
-
-    HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, gray.rows / 16, HOUGH_CANNY_THRESHOLD, HOUGH_CIRCLE_ROUNDNESS, BOWLS_HOUGH_MIN_RADIUS, BOWLS_HOUGH_MAX_RADIUS);
-
-    for (int i =0; i<circles.size();i++)
-    {
-        Vec3i c = circles[i];
-        Point center = Point(c[0],c[1]);
-        circle(ImageCircles, center, 1,Scalar(0,100,100),3,LINE_AA);
-        int radius = c[2];
-       // circle(ImageCircles,center,radius,Scalar(0,0,0),3,LINE_AA);
-        circle(mask, center, radius, Scalar(255), -1);
-    }
-
-
-    for(int i=0;i<ImageCircles.rows;i++)
-    {
-        for(int j=0;j<ImageCircles.cols;j++)
-        {
-            if(mask.at<unsigned char>(i,j)==0)
-            {
-                ImageCircles.at<Vec3b>(i,j) = 0;
-            }
-        }
-    }
-
-    return ImageCircles;
-}
-
+//ste
 Mat removeDishes(Mat image, int delta)
 {
     Mat img;
