@@ -11,15 +11,10 @@ using namespace cv;
 
 Mat detectDishesEdge(const Mat& image)
 {
-
     int max= 350;
     int min = 250;
     int hCanny = 100;
     int hCircle = 50;
-
-
-
-
     Mat imageCircles;
     image.copyTo(imageCircles);
     Mat gray;
@@ -109,6 +104,11 @@ Mat detectFoods(const Mat& image)
     return all;
 }
 
+Mat detectBread(const Mat& image)
+{
+
+    return image;
+}
 
 
 

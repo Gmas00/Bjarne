@@ -15,6 +15,10 @@ using namespace cv;
 using namespace std;
 
 
+
+
+
+
 int main()
 {
     const vector<string> labels ={
@@ -47,12 +51,27 @@ int main()
 
 for(int i=0;i<4;i++)
 {
+    break;
     Mat image, output;
     image = tray8[i];
     output = detectFoods(image);
     imshow("food", output);
     waitKey(0);
 }
+
+    Mat temp2;
+    Mat img = tray1[0];
+    Mat external, temp;
+    temp = detectFoods(img);
+    external = img - temp;
+    imshow("ex",external);
+    waitKey(0);
+
+    
+
+
+
+
 
 
     //Mask mas(tray2[0]);

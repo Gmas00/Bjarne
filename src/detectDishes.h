@@ -20,6 +20,9 @@ cv::Mat detectDishesEdge(const cv::Mat& image);
 
 cv::Mat detectFoods(const cv::Mat& image);
 
+cv::Mat detectBread(const cv::Mat& image);
+
+
 
 //tentativi
 cv::Mat watershedByOpencCV(cv::Mat src);

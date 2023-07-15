@@ -22,3 +22,22 @@ vector<Mat> createVecImgFromSource(string path)
 
 }
 
+
+Mat filterAreas(const cv::Mat& input,int threshold)
+{
+    Mat output;
+    Mat gray;
+    cvtColor(input, gray, cv::COLOR_BGR2GRAY);
+    vector<vector<Point>> contours;
+    findContours(gray, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+    for (int i = 0; i < contours.size(); i++)
+    {
+        if (contourArea(contours[i]) > threshold)
+        {
+            drawContours(output, contours, i, 255, -1);
+        }
+    }
+    return output;
+}
+
