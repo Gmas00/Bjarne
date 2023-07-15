@@ -107,11 +107,16 @@ int main()
 
     for(int i=0;i<4;i++)
     {
-        Mat img = detectDishesEdge(tray8[i]);
+        Mat img = detectDishesEdge(tray2[i]);
         int delta = 20;
+
+        Mat salad = detectSalad(tray2[i]);
         Mat temp = removeDishes(img, delta);
         imshow("temp", temp);
+        imshow("salad",salad);
         waitKey(0);
+
+
     }
 
     return 0;
