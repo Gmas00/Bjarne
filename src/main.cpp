@@ -55,8 +55,8 @@ int main()
         //Mat salad = detectSalad(tray3[i]);
         //Mat temp = watershedByOpencCV(removeDishes(img, delta));
         //imshow("temp", img);
-       // imshow("salad",salad);
-        //waitKey(0);
+        imshow("salad",salad);
+        waitKey(0);
     }
 
 
