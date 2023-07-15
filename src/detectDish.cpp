@@ -20,6 +20,7 @@ Mat detectDishesEdge(Mat image)
     vector<Vec3f>circles;
     //HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/16,100,30,268,292);
     HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 260, 280);
+
     for (int i =0; i<circles.size();i++)
     {
         Vec3i c = circles[i];
@@ -242,36 +243,42 @@ Mat segmentationHope(Mat dishes0)
     return  dishes;
 }
 
-Mat detectSalad(cv::Mat image)
+Mat detectSalad(Mat image)
 {
+
+
+    const unsigned int HOUGH_CANNY_THRESHOLD = 100;
+    const unsigned int HOUGH_CIRCLE_ROUNDNESS = 50;
+
+    const unsigned int BOWLS_HOUGH_MAX_RADIUS = 210;
+
+
+
     Mat ImageCircles;
     image.copyTo(ImageCircles);
     Mat gray;
     cvtColor(image,gray,COLOR_RGB2GRAY);
 
     medianBlur(gray,gray,5);
-
+    Mat mask(ImageCircles.size(), CV_8UC1, Scalar(0));
     //get the circle edges
     vector<Vec3f>circles;
-    HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/8,100,30,179,191);
+    //HoughCircles(gray,circles,HOUGH_GRADIENT,1,gray.rows/8,100,30,179,191);
+    //HoughCircles(gray, circles, HOUGH_GRADIENT, 1,220,100, 20, 175, 210);
+
+    HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, gray.rows / 16, HOUGH_CANNY_THRESHOLD, HOUGH_CIRCLE_ROUNDNESS, BOWLS_HOUGH_MIN_RADIUS, BOWLS_HOUGH_MAX_RADIUS);
+
     for (int i =0; i<circles.size();i++)
     {
         Vec3i c = circles[i];
         Point center = Point(c[0],c[1]);
         circle(ImageCircles, center, 1,Scalar(0,100,100),3,LINE_AA);
         int radius = c[2];
-        circle(ImageCircles,center,radius,Scalar(0,0,0),3,LINE_AA);
-    }
-
-    //mask to isolate only the dish
-    /*Mat mask(ImageCircles.size(), CV_8UC1, Scalar(0));
-    for (int i = 0; i < circles.size(); i++)
-    {
-        Vec3i c = circles[i];
-        Point center = Point(c[0], c[1]);
-        int radius = c[2];
+       // circle(ImageCircles,center,radius,Scalar(0,0,0),3,LINE_AA);
         circle(mask, center, radius, Scalar(255), -1);
     }
+
+
     for(int i=0;i<ImageCircles.rows;i++)
     {
         for(int j=0;j<ImageCircles.cols;j++)
@@ -281,7 +288,7 @@ Mat detectSalad(cv::Mat image)
                 ImageCircles.at<Vec3b>(i,j) = 0;
             }
         }
-    }*/
+    }
 
     return ImageCircles;
 }
