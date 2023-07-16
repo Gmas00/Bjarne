@@ -14,6 +14,8 @@ using namespace cv;
 using namespace std;
 
 
+
+
 int main()
 {
     const vector<string> labels = getLabels();
@@ -31,27 +33,11 @@ int main()
     for(int i=0;i<4;i++)
     {
         Mat img = tray4[i];
-        Mat external, temp;
-        temp = detectFoods(img);
-        external = img - temp;
-
-        Mat image;
-        external.copyTo(image);
-        Mat bread = detectBreadByHisto(image,img);
+        Mat bread = detectBreadByHisto(img);
         imshow("bread",bread);
         waitKey(0);
-       /* Mat image, output;
-        image = tray8[i];
-        output = detectFoods(image);
-        imshow("food", output);
-        waitKey(0);*/
+
     }
-
-
-
-
-
-
 
 //Mask m_10(tray1[3]);
     return 0;
