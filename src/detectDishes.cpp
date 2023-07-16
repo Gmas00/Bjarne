@@ -106,7 +106,7 @@ Mat detectFoods(const Mat& image)
 // AJ CODE, serve nella funzione dopo probabilmente
 Mat detectBread(const Mat& image)
 {
-    const int THRESHOLD = 64;
+    const int THRESHOLD = 32;
     // Convert to HSV color space
     Mat hsv_image;
     cvtColor(image, hsv_image, COLOR_RGB2HSV);
@@ -122,7 +122,7 @@ Mat detectBread(const Mat& image)
     findContours(thresholded_HSV, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
     for(int i=0; i<contours.size(); i++)
     {
-        if(contourArea(contours[i]) > 8000)
+        if(contourArea(contours[i]) > 4000)
         {
             drawContours(thresholded_HSV, contours, i, 255, -1);
         }
@@ -141,7 +141,7 @@ Mat detectBread(const Mat& image)
 }
 
 //altra funzione per il pane, forse il secondo parametro nn serve
-Mat detectBreadByHisto(const Mat& image,Mat& originalImage)
+Mat detectBreadByHisto(const Mat& image, Mat& originalImage)
 {
     Mat bread;
     int size = 50;
@@ -152,6 +152,12 @@ Mat detectBreadByHisto(const Mat& image,Mat& originalImage)
 
     Scalar targetColor1(38, 187, 181);
     Scalar targetColor2(2,53,73);
+    Scalar targetColor3(197,95,43);     //Arancione-marroncino del biglietto dessert
+    Scalar targetColor4(213,213,0);     //Post it giallo
+    Scalar targetColor5(0,62,182);      //Blu dello yogurt
+    Scalar targetColor6(0,10,87);       //Blu scuro dello yogurt
+    Scalar targetColor7(210,120,60);    //Un altro Arancione del biglietto dessert
+    Scalar targetColor8(0,59,153);      //Un altro blu dello yogurt
     //rgb(73,53,2)
     //aggiungere altri target, così becco il biglietto giallo
     //uso estensione su chrome per ottenere rbg
@@ -159,6 +165,12 @@ Mat detectBreadByHisto(const Mat& image,Mat& originalImage)
     int thresold = 100;
     removeSimilarPixels(bread,targetColor1,thresold);
     removeSimilarPixels(bread,targetColor2,thresold);
+    removeSimilarPixels(bread,targetColor3,thresold);
+    removeSimilarPixels(bread,targetColor4,thresold);
+    removeSimilarPixels(bread,targetColor5,thresold);
+    removeSimilarPixels(bread,targetColor6,thresold);
+    removeSimilarPixels(bread,targetColor7,thresold);
+    removeSimilarPixels(bread,targetColor8,thresold);
 
     //bread = bread - temp;
     return bread;
@@ -178,8 +190,8 @@ Mat removeDishes(Mat image, int delta)
             int avg = (int)(pix[0] + pix[1] + pix[2])/3;
             if(pix[0]-avg < delta && pix[1]-avg < delta && pix[2]-avg < delta)
             {
-                img.at<Vec3b>(i,j) [0]= 0;
-                img.at<Vec3b>(i,j) [1]= 0;
+                img.at<Vec3b>(i,j) [0] = 0;
+                img.at<Vec3b>(i,j) [1] = 0;
                 img.at<Vec3b>(i,j) [2] = 0;
             }
         }

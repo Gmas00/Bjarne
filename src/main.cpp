@@ -30,15 +30,18 @@ int main()
 
     for(int i=0;i<4;i++)
     {
-        Mat img = tray4[i];
+        Mat img = tray5[i];
         Mat external, temp;
         temp = detectFoods(img);
         external = img - temp;
 
         Mat image;
         external.copyTo(image);
-        Mat bread = detectBreadByHisto(image,img);
-        imshow("bread",bread);
+        Mat bread_hist = detectBreadByHisto(image,img);
+        Mat bread = detectBread(image);
+
+        //imshow("Bread histogram", bread_hist);
+        imshow("Bread", bread);
         waitKey(0);
        /* Mat image, output;
         image = tray8[i];
