@@ -14,6 +14,8 @@ using namespace cv;
 using namespace std;
 
 
+
+
 int main()
 {
     const vector<string> labels = getLabels();
@@ -42,19 +44,12 @@ int main()
 
         //imshow("Bread histogram", bread_hist);
         imshow("Bread", bread);
+        Mat img = tray4[i];
+        Mat bread = detectBreadByHisto(img);
+        imshow("bread",bread);
         waitKey(0);
-       /* Mat image, output;
-        image = tray8[i];
-        output = detectFoods(image);
-        imshow("food", output);
-        waitKey(0);*/
+
     }
-
-
-
-
-
-
 
 //Mask m_10(tray1[3]);
     return 0;

@@ -52,7 +52,7 @@ vector<Vec3b> findMostFrequentColors(const Mat& image, int numColors)
         Vec3b color(i, i, i);
         int frequency = b_hist.at<float>(i) + g_hist.at<float>(i) + r_hist.at<float>(i);
 
-        if (color != Vec3b(0, 0, 0)) // Escludi il colore nero
+        if (color != Vec3b(0, 0, 0))
         {
             colorFrequencies.push_back(make_pair(color, frequency));
         }
@@ -72,20 +72,17 @@ Mat removeColors(const Mat& image1,int size,int numColors,int delta)
 {
     Mat image;
     image1.copyTo(image);
-    //size = 50
+    vector<Vec3b> mostFrequentColors = findMostFrequentColors(image, numColors);
     for(int i=0;i<size;i++)
     {
-        //numcolors =100;
-        vector<Vec3b> mostFrequentColors = findMostFrequentColors(image, numColors);
         Vec3b targetColor = mostFrequentColors[i];
-        //delta=22
-        for (int y = 0; y < image.rows; y++)
+        for (int j = 0; j < image.rows; j++)
         {
-            for (int x = 0; x < image.cols; x++)
+            for (int k = 0; k < image.cols; k++)
             {
-                Vec3b currentColor = image.at<Vec3b>(y, x);
+                Vec3b currentColor = image.at<Vec3b>(j, k);
                 if (abs(currentColor[0] - targetColor[0]) <= delta && abs(currentColor[1] - targetColor[1]) <= delta && abs(currentColor[2] - targetColor[2]) <= delta)
-                    image.at<Vec3b>(y, x) = Vec3b(0, 0, 0);
+                    image.at<Vec3b>(j, k) = Vec3b(0, 0, 0);
             }
         }
     }
@@ -118,14 +115,14 @@ vector<string> getLabels()
 //serve per rimuovere un colore con una certa soglia
 void removeSimilarPixels(Mat& image, const Scalar& targetColor, int delta)
 {
-    for (int y = 0; y < image.rows; y++)
+    for (int i = 0; i < image.rows; i++)
     {
-        for (int x = 0; x < image.cols; x++)
+        for (int j = 0; j < image.cols; j++)
         {
-            Vec3b pixel = image.at<Vec3b>(y, x);
+            Vec3b pixel = image.at<Vec3b>(i, j);
             int diff = 0;
-            for (int i = 0; i < 3; ++i)
-                diff += abs(pixel[i] - targetColor[i]);
+            for (int k = 0; k < 3; k++)
+                diff += abs(pixel[k] - targetColor[k]);
 
             if (diff <= delta)
             {
@@ -133,7 +130,7 @@ void removeSimilarPixels(Mat& image, const Scalar& targetColor, int delta)
                 pixel[1] = 0;
                 pixel[2] = 0;
             }
-            image.at<Vec3b>(y, x) = pixel;
+            image.at<Vec3b>(i, j) = pixel;
         }
     }
 }
