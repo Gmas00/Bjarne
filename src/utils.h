@@ -28,4 +28,6 @@ std::vector<cv::Vec3b> findMostFrequentColors(const cv::Mat& image, int numColor
 
 cv::Mat removeColors(const cv::Mat& image1,int size,int numColors,int delta);
 
+
+void removeSimilarPixels(cv::Mat& image, const cv::Scalar& targetColor, int delta);
 #endif //FOOD_RECOGNITION_AND_LEFTOVER_ESTIMATION_UTILS_H

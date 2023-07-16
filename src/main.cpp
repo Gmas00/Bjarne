@@ -30,24 +30,24 @@ int main()
 
     for(int i=0;i<4;i++)
     {
-        break;
-        Mat image, output;
+        Mat img = tray4[i];
+        Mat external, temp;
+        temp = detectFoods(img);
+        external = img - temp;
+
+        Mat image;
+        external.copyTo(image);
+        Mat bread = detectBreadByHisto(image,img);
+        imshow("bread",bread);
+        waitKey(0);
+       /* Mat image, output;
         image = tray8[i];
         output = detectFoods(image);
         imshow("food", output);
-        waitKey(0);
+        waitKey(0);*/
     }
 
-    Mat img = tray5[0];
-    Mat external, temp;
-    temp = detectFoods(img);
-    external = img - temp;
 
-    Mat image;
-    external.copyTo(image);
-    Mat bread = detectBreadByHisto(image);
-    imshow("bread",bread);
-    waitKey(0);
 
 
 

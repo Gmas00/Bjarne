@@ -115,6 +115,29 @@ vector<string> getLabels()
 
 }
 
+//serve per rimuovere un colore con una certa soglia
+void removeSimilarPixels(Mat& image, const Scalar& targetColor, int delta)
+{
+    for (int y = 0; y < image.rows; y++)
+    {
+        for (int x = 0; x < image.cols; x++)
+        {
+            Vec3b pixel = image.at<Vec3b>(y, x);
+            int diff = 0;
+            for (int i = 0; i < 3; ++i)
+                diff += abs(pixel[i] - targetColor[i]);
+
+            if (diff <= delta)
+            {
+                pixel[0] = 0;
+                pixel[1] = 0;
+                pixel[2] = 0;
+            }
+            image.at<Vec3b>(y, x) = pixel;
+        }
+    }
+}
+
 
 
 

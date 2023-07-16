@@ -140,14 +140,27 @@ Mat detectBread(const Mat& image)
     return max_filtered;
 }
 
-//altra funzione per il pane
-Mat detectBreadByHisto(const Mat& image)
+//altra funzione per il pane, forse il secondo parametro nn serve
+Mat detectBreadByHisto(const Mat& image,Mat& originalImage)
 {
     Mat bread;
     int size = 50;
     int numColors = 100;
     int delta = 30;
     bread = removeColors(image,size,numColors,delta);
+    //Mat temp = detectFoods(originalImage);
+
+    Scalar targetColor1(38, 187, 181);
+    Scalar targetColor2(2,53,73);
+    //rgb(73,53,2)
+    //aggiungere altri target, così becco il biglietto giallo
+    //uso estensione su chrome per ottenere rbg
+
+    int thresold = 100;
+    removeSimilarPixels(bread,targetColor1,thresold);
+    removeSimilarPixels(bread,targetColor2,thresold);
+
+    //bread = bread - temp;
     return bread;
 }
 

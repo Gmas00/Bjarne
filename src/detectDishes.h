@@ -20,7 +20,7 @@ cv::Mat detectFoods(const cv::Mat& image);
 //Function that given an image, returns a new image with only the bread in the picture
 cv::Mat detectBread(const cv::Mat& image);
 
-cv::Mat detectBreadByHisto(cv::Mat& image);
+cv::Mat detectBreadByHisto(const cv::Mat& image,cv::Mat& originalImage);
 
 //ste
 cv::Mat removeDishes(cv::Mat image, int delta);
