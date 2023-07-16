@@ -25,6 +25,10 @@ cv::Mat detectBreadByHisto(const cv::Mat& image);
 //ste
 cv::Mat removeDishes(cv::Mat image, int delta);
 
+void findSquares(const cv::Mat& image, std::vector<std::vector<cv::Point>>& squares);
+void drawSquares(cv::Mat& image, const std::vector<std::vector<cv::Point>>& squares, const char* wndname);
+double angle(cv:: Point p1, cv::Point p2, cv::Point p0);
+
 
 
 

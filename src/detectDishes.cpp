@@ -5,6 +5,7 @@
 
 #include "detectDishes.h"
 #include "utils.h"
+
 using namespace std;
 using namespace cv;
 
@@ -198,3 +199,118 @@ Mat removeDishes(Mat image, int delta)
     }
     return img;
 }
+
+//Fanculo queste 3 funzioni non funzionano
+//Hough transform to detect lines, evaluate the angles between them and detect squares
+void findSquares(const Mat& image, vector<vector<Point>>& squares){
+    int thresh = 50, N=11;
+
+    squares.clear();
+    Mat pyr, timg, gray0(image.size(), CV_8U), gray;
+
+    //Down and up scale image to filter noise
+    pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
+    pyrUp(pyr, timg, image.size());
+    vector<vector<Point>> contours;
+
+    //Find squares in every color plane of the image
+    for(int c=0; c<3; c++){
+        int ch[] = {c, 0};
+        mixChannels(&timg, 1, &gray0, 1, ch, 1);
+
+        //Try several threshold levels
+        for(int l=0; l<N; l++){
+            //Use Canny instead of zero threshold level to catch squares with gradient 
+            if(l==0){
+                Canny(gray0, gray, 0, thresh, 5);
+                //Dilate Canny output to remove potential holes between edge segments
+                dilate(gray, gray, Mat(), Point(-1,-1));
+            }
+            else{
+                //Apply threshold if l!=0: tgray(x,y)=gray(x,y)<(l+1)*255/N ? 255:0
+                gray = gray0 >= (l+1)*255/N;
+            }
+
+            //Find contours and store them in a list
+            findContours(gray, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
+
+            vector<Point> approx;
+
+            //Test contours
+            for(size_t i=0; i<contours.size(); i++){
+                //Approximate countour with accuracy proportional to the contour perimeter
+                approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
+
+                //Square contours should have 4 vertices after approximation, be convex and have area > 1000
+                //Area may be positive or negative, depending on contour orientation
+                if(approx.size()==4 && fabs(contourArea(Mat(approx))) > 5 && isContourConvex(Mat(approx))){
+                    double maxCosine=0;
+                    for(int j=2; j<5; j++){
+                        //Find maximum cosine of the angle between joint edges
+                        double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
+                        maxCosine = MAX(maxCosine, cosine);
+                    }
+
+                    //If cosines of all angles are small then write quadrangle vertices to resultant sequence
+                    if(maxCosine < 0.3)
+                        squares.push_back(approx);
+
+                }
+            }
+
+        }
+    }
+}
+
+//Function to draw squares on the image
+void drawSquares(Mat& image, const vector<vector<Point>>& squares, const char* wndname){
+    for(size_t i=0; i<squares.size(); i++){
+        const Point* p = &squares[i][0];
+        int n = (int)squares[i].size();
+        polylines(image, &p, &n, 1, true, Scalar(0,255,0), 3, LINE_AA);
+    }
+
+    imshow(wndname, image);
+}
+
+//Helper function that finds cosine of angle between vectors
+double angle(Point p1, Point p2, Point p0){
+    double dx1 = p1.x - p0.x;
+    double dy1 = p1.y - p0.y;
+    double dx2 = p2.x - p0.x;
+    double dy2 = p2.y - p0.y;
+    return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
+}
+/*
+Mat HoughTransform(const Mat& image){
+    Mat blur, canny, canny_bgr, cannyP;
+
+    //Blurr the image
+    GaussianBlur(image, blur, Size(9, 9), 0); 
+    //Apply Canny edge detector
+    Canny(blur, canny, 50, 200);
+
+    //Copy edge image to another image to show BGR 
+    cvtColor(canny, canny_bgr, COLOR_GRAY2BGR);
+    cannyP = canny_bgr.clone();
+
+    //Apply Standard Hough Line Transform
+    vector<Vec2f> lines;
+    HoughLines(canny, lines, 1, CV_PI / 180, 100, 0, 0, 0, CV_PI / 3);
+    //Draw lines
+    for(size_t i=0; i<lines.size(); i++){
+        float rho = lines[i][0], theta = lines[i][1];
+        Point pt1, pt2;
+        double a = cos(theta), b = sin(theta);
+        double x0 = a*rho, y0 = b*rho;
+
+        pt1.x = cvRound(x0 + 1000*(-b));
+        pt1.y = cvRound(y0 + 1000*(a));
+
+        pt2.x = cvRound(x0 - 1000*(-b));
+        pt2.y = cvRound(y0 - 1000*(a));
+
+        line(canny_bgr, pt1, pt2, Scalar(0, 0, 255), 3, LINE_AA);
+    }
+}
+*/
