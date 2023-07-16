@@ -11,30 +11,19 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
-
-
+//Function that given an image, returns a new image with only the salad in the picture
 cv::Mat detectSalad(const cv::Mat& image);
-
+//Function that given an image, returns a new image with only the dishes in the picture
 cv::Mat detectDishesEdge(const cv::Mat& image);
-
+//Function that given an image, returns a new image with dishes and salad in the picture
 cv::Mat detectFoods(const cv::Mat& image);
-
+//Function that given an image, returns a new image with only the bread in the picture
 cv::Mat detectBread(const cv::Mat& image);
 
 
-
-//tentativi
-cv::Mat watershedByOpencCV(cv::Mat src);
-
-cv::Mat augmentation( cv::Mat image, float factor);
-
-cv::Mat segmentationHope(cv::Mat dishes0);
-
-cv::Mat segmentImage(const cv::Mat& inputImage, int k);
-
 //ste
 cv::Mat removeDishes(cv::Mat image, int delta);
+
 
 
 

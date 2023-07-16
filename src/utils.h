@@ -17,7 +17,7 @@
 
 
 std::vector<cv::Mat> createVecImgFromSource(std::string path);
-cv::Mat filterAreas(const cv::Mat& input,int threshold);
+//void filterAreas(const cv::Mat& input,cv::Mat& output,int threshold);
 
 
 #endif //FOOD_RECOGNITION_AND_LEFTOVER_ESTIMATION_UTILS_H
