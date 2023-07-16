@@ -95,15 +95,15 @@ Mat detectFoods(const Mat& image)
 {
     vector<Mat>images;
     Mat temp1, temp2;
-    //image.copyTo(temp1);
-    //image.copyTo(temp2);
-
     temp1 = detectDishesEdge(image);
     temp2 = detectSalad(image);
     Mat all = temp1 + temp2;
     return all;
 }
+
+
 //Function that given an image, returns a new image with only the bread in the picture
+// AJ CODE, serve nella funzione dopo probabilmente
 Mat detectBread(const Mat& image)
 {
     const int THRESHOLD = 64;
@@ -140,7 +140,16 @@ Mat detectBread(const Mat& image)
     return max_filtered;
 }
 
-
+//altra funzione per il pane
+Mat detectBreadByHisto(const Mat& image)
+{
+    Mat bread;
+    int size = 50;
+    int numColors = 100;
+    int delta = 30;
+    bread = removeColors(image,size,numColors,delta);
+    return bread;
+}
 
 
 //ste

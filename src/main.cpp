@@ -10,46 +10,13 @@
 #include "detectDishes.h"
 #include "utils.h"
 
-
 using namespace cv;
 using namespace std;
 
 
-void filterAreas(const cv::Mat& input, cv::Mat& output, int threshold)
-{
-    std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(input.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-    for (const auto& contour : contours)
-    {
-        if (cv::contourArea(contour) > threshold)
-        {
-            cv::drawContours(output, { contour }, -1, 255, cv::FILLED);
-        }
-    }
-}
-
-
-
 int main()
 {
-    const vector<string> labels = {
-            "Background",
-            "pasta with pesto",
-            "pasta with tomato sauce",
-            "pasta with meat sauce",
-            "pasta with clams and mussels",
-            "pilaw rice with peppers and peas",
-            "grilled pork cutlet",
-            "fish cutlet",
-            "rabbit",
-            "seafood salad",
-            "beans",
-            "basil potatoes",
-            "salad",
-            "bread"
-    };
-
+    const vector<string> labels = getLabels();
 
     vector<Mat> tray1, tray2, tray3, tray4, tray5, tray6, tray7, tray8;
     tray1 = createVecImgFromSource("../src/resource/Food_leftover_dataset/tray1/");
@@ -63,6 +30,7 @@ int main()
 
     for(int i=0;i<4;i++)
     {
+        break;
         Mat image, output;
         image = tray8[i];
         output = detectFoods(image);
@@ -70,27 +38,21 @@ int main()
         waitKey(0);
     }
 
-    Mat temp2;
-    Mat img = tray1[2];
+    Mat img = tray5[0];
     Mat external, temp;
     temp = detectFoods(img);
     external = img - temp;
-    //imshow("ex",external);
-    //waitKey(0);
 
-    Mat bread = detectBread(img);
-    //imshow("bread", bread);
-    //waitKey(0);
-
-
-    //int AREA_THRESHOLD_1 = 4000;
-    //int AREA_THRESHOLD_2 = 8000;
-    //int CONTOURS_DISTANCE_THRESHOLD = 45;
-
-
-    //Mask m_10(tray2[0]);
+    Mat image;
+    external.copyTo(image);
+    Mat bread = detectBreadByHisto(image);
+    imshow("bread",bread);
+    waitKey(0);
 
 
 
+
+
+//Mask m_10(tray1[3]);
     return 0;
 }

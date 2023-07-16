@@ -19,5 +19,13 @@
 std::vector<cv::Mat> createVecImgFromSource(std::string path);
 //void filterAreas(const cv::Mat& input,cv::Mat& output,int threshold);
 
+std::vector<std::string> getLabels();
+
+
+bool compareColors(const std::pair<cv::Vec3b, int>& color1, const std::pair<cv::Vec3b, int>& color2);
+
+std::vector<cv::Vec3b> findMostFrequentColors(const cv::Mat& image, int numColors);
+
+cv::Mat removeColors(const cv::Mat& image1,int size,int numColors,int delta);
 
 #endif //FOOD_RECOGNITION_AND_LEFTOVER_ESTIMATION_UTILS_H

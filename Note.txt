@@ -9,3 +9,23 @@ tray5 ok
 tray6 ok
 tray7 ok
 tray8 ok
+
+
+STEFANO
+ha preso tutte le food_image
+e isolato i cibi
+
+
+
+NEW
+tray4 non vede un piatto nella seconda e terza foto
+Il pane è nel tray1,tray4,tray5
+
+
+
+
+
+
+
+
+
